@@ -1,52 +1,27 @@
 <!DOCTYPE>
 <html>
   <head>
+    <title>cdg.js prototype</title>
+    <script src="lib/cdg.js"></script>
   </head>
   <body>
     <input type="file" id="upload-field" />
     <pre id="debug-output"></pre>
     <script>
-
-      // "spec" http://jbum.com/cdg_revealed.html
-
-      // readAsBinaryString --> chars
-      // var view = new DataView(reader.result); .getUint32/etc.
-      // ArrayBufferView Int8Array (char)
-      // Uint8Array
-      // Has masking examples: https://www.inkling.com/read/javascript-definitive-guide-david-flanagan-6th/chapter-22/typed-arrays-and-arraybuffers
-
-      // NOTE Dart port would be delicious
-
-      // API - stream sectors to callback.  Each sector has packets.  Packets are normalized including with easy to work with *pixels* and colors.
-
+      // Print parsed commands to <pre> when file input is updated
       window.onload = function() {
         var uploadField = document.getElementById("upload-field");
         var debugOutput = document.getElementById("debug-output");
 
-        function readPacket(packetBytes) {
-          // read command (first 6 bits)
-          // TODO ignore non-9 commands (these are for audio CDGs ... TODO test with audio CDG)
-          var command = packetBytes[0] & 0x3F;
-
-          // read instruction
-          var instruction = packetBytes[1] & 0x3F;
-
-          debugOutput.textContent = debugOutput.textContent + "Command: " + command + "\n";
-          debugOutput.textContent = debugOutput.textContent + "Instruction: " + instruction + "\n";
-        }
-
         uploadField.addEventListener("change", function(e) {
-          var reader = new FileReader();
-          reader.onload = function(e) {
-            var arrayBuffer = reader.result;
-            // read some packets
-            for (var i = 0; i < 100; i++) {
-              var startByte = i * 24;
-              var packetBytes = new Uint8Array(arrayBuffer, startByte, 24);
-              readPacket(packetBytes);
-            }
+          var cdg = new CDG();
+          var packetLimit = 2000; // only print some packets
+          cdg.onPacket = function(packet) {
+            if (packetLimit == 0) return;
+            debugOutput.textContent = debugOutput.textContent + JSON.stringify(packet) + "\n";
+            packetLimit--;
           };
-          reader.readAsArrayBuffer(uploadField.files[0]);
+          cdg.loadFile(uploadField.files[0]);
         });
       };
     </script>
