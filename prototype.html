@@ -16,6 +16,11 @@
         uploadField.addEventListener("change", function(e) {
           var cdg = new CDG();
           var packetLimit = 2000; // only print some packets
+          // TODO it might not be a "packet" concept we want to return ... 
+          // it's likely that we'll have / I'll want:
+          //  - low-level pure CDG (needs to exist to provide higher-level simple interface for <canvas>)
+          //  - higher-level callbacks per packet ??? don't focus on ...
+          //  - something ideal to use to render a <canvas> ... this design will sort itself out
           cdg.onPacket = function(packet) {
             if (packetLimit == 0) return;
             debugOutput.textContent = debugOutput.textContent + JSON.stringify(packet) + "\n";
