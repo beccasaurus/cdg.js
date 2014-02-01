@@ -108,9 +108,9 @@
             } else if (packet.borderColor) {
               drawingCanvas.fillStyle = rgbColor(packet.borderColor);
               drawingCanvas.fillRect(0, 0, FULL_WIDTH, 3);
-              drawingCanvas.fillRect(FULL_HEIGHT - 3, 0, FULL_WIDTH, 3);
+              drawingCanvas.fillRect(0, FULL_HEIGHT - 3, FULL_WIDTH, 3);
               drawingCanvas.fillRect(0, 0, 6, FULL_HEIGHT);
-              drawingCanvas.fillRect(0, FULL_WIDTH - 6, 6, FULL_HEIGHT);
+              drawingCanvas.fillRect(FULL_WIDTH - 6, 0, 6, FULL_HEIGHT);
               drawingCanvas.save();
             }
 
