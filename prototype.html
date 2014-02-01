@@ -15,6 +15,10 @@
       Display field (middle for TV): 294 x 204
       Border is displayed around display for TV
       The viewable area of the screen (294x204) is divided into 24 tiles (6x4 of 49x51 each)
+
+      The border area is the area contained with a
+      rectangle defined by (0,0,300,216) minus the interior pixels which are contained
+      within a rectangle defined by (6,12,294,204).
     -->
     <canvas id="display" width="300" height="216" style="border: 1px solid black;"></canvas>
 
@@ -54,6 +58,15 @@
     <pre id="debug-output"></pre>
 
     <script>
+      var FULL_WIDTH = 300
+      var FULL_HEIGHT = 216
+      var DISPLAY_WIDTH = 288;
+      var DISPLAY_HEIGHT = 192;
+      var TILES_PER_ROW = 6;
+      var TILES_PER_COL = 4;
+      var TILE_WIDTH = DISPLAY_WIDTH / TILES_PER_ROW;
+      var TILE_HEIGHT = DISPLAY_HEIGHT / TILES_PER_COL;
+
       // Print parsed commands to <pre> when file input is updated
       window.onload = function() {
         var uploadField = document.getElementById("upload-field");
@@ -90,7 +103,15 @@
               }
             } else if (packet.fillColor && lastFillColor != packet.fillColor) {
               drawingCanvas.fillStyle = rgbColor(packet.fillColor);
-              drawingCanvas.fillRect(0, 0, canvas.width, canvas.height);
+              drawingCanvas.fillRect(0, 0, FULL_WIDTH, FULL_HEIGHT);
+              drawingCanvas.save();
+            } else if (packet.borderColor) {
+              drawingCanvas.fillStyle = rgbColor(packet.borderColor);
+              drawingCanvas.fillRect(0, 0, FULL_WIDTH, 3);
+              drawingCanvas.fillRect(FULL_HEIGHT - 3, 0, FULL_WIDTH, 3);
+              drawingCanvas.fillRect(0, 0, 6, FULL_HEIGHT);
+              drawingCanvas.fillRect(0, FULL_WIDTH - 6, 6, FULL_HEIGHT);
+              drawingCanvas.save();
             }
 
             packetLimit--;
