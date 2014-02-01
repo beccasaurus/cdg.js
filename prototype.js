@@ -42,7 +42,7 @@ window.onload = function() {
     //  - something ideal to use to render a <canvas> ... this design will sort itself out
     cdg.onPacket = function(packet) {
       if (packetLimit == 0) return;
-      debugOutput.textContent = JSON.stringify(packet) + "\n" + debugOutput.textContent;
+      // debugOutput.textContent = JSON.stringify(packet) + "\n" + debugOutput.textContent;
 
       if (packet.colorTable) {
         for (var colorIndex in cdg.colorTable) {
