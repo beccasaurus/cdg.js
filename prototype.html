@@ -5,13 +5,34 @@
     <script src="lib/cdg.js"></script>
   </head>
   <body>
+
+    <!-- For prototyping, use input field to set .CDG -->
     <input type="file" id="upload-field" />
+
+    <!-- canvas for rendering graphics -->
+    <!--
+      Full size: 300 x 216
+      Display field (middle for TV): 294 x 204
+      Border is displayed around display for TV
+      The viewable area of the screen (294x204) is divided into 24 tiles (6x4 of 49x51 each)
+    -->
+    <canvas id="display" width="300" height="216" style="border: 1px solid black;"></canvas>
+
+    <audio id="audio"></audio>
+
+    <!-- pre field to print debug output -->
     <pre id="debug-output"></pre>
+
     <script>
       // Print parsed commands to <pre> when file input is updated
       window.onload = function() {
         var uploadField = document.getElementById("upload-field");
         var debugOutput = document.getElementById("debug-output");
+        var canvas = document.getElementById("display");
+        var audio = document.getElementById("audio");
+
+        window.theCanvas = canvas;
+        window.theAudio = audio;
 
         uploadField.addEventListener("change", function(e) {
           var cdg = new CDG();
@@ -26,9 +47,23 @@
             debugOutput.textContent = debugOutput.textContent + JSON.stringify(packet) + "\n";
             packetLimit--;
           };
-          cdg.loadFile(uploadField.files[0]);
+
+          window.currentFile = uploadField.files[0];
+          // cdg.loadFile(uploadField.files[0]);
         });
       };
+
+      // load file input into audio[src] as data URL (base64 encoded)
+      function loadMp3() {
+        // miroseconds: theAudio.currentTime * 1000000
+        var reader = new FileReader();
+        reader.onload = function(e) {
+          window.theAudio.src = e.target.result;
+        };
+        reader.readAsDataURL(window.currentFile);
+      }
+
+      // new FileReader().readAsDataURL(document.getElementById("upload-field").files[0])
     </script>
   </body>
 </html>
