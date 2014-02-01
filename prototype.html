@@ -18,6 +18,36 @@
     -->
     <canvas id="display" width="300" height="216" style="border: 1px solid black;"></canvas>
 
+    <!-- render the color table for debugging -->
+    <style>
+      #color-table div {
+        height: 20px;
+        width: 20px;
+        margin-right: 1px;
+        border: 1px solid black;
+        display: inline-block;
+        font-size: 10px;
+      }
+    </style>
+    <div id="color-table">
+      <div id="color1">1</div>
+      <div id="color2">2</div>
+      <div id="color3">3</div>
+      <div id="color4">4</div>
+      <div id="color5">5</div>
+      <div id="color6">6</div>
+      <div id="color7">7</div>
+      <div id="color8">8</div>
+      <div id="color9">9</div>
+      <div id="color10">10</div>
+      <div id="color11">11</div>
+      <div id="color12">12</div>
+      <div id="color13">13</div>
+      <div id="color14">14</div>
+      <div id="color15">15</div>
+      <div id="color16">16</div>
+    </div>
+
     <audio id="audio"></audio>
 
     <!-- pre field to print debug output -->
@@ -44,12 +74,22 @@
           //  - something ideal to use to render a <canvas> ... this design will sort itself out
           cdg.onPacket = function(packet) {
             if (packetLimit == 0) return;
-            debugOutput.textContent = debugOutput.textContent + JSON.stringify(packet) + "\n";
+            // debugOutput.textContent = debugOutput.textContent + JSON.stringify(packet) + "\n";
+            if (packet.colorTable) {
+              console.log(packet.colorTable);
+              for (var colorIndex in packet.colorTable) {
+                var colorElementId = "color" + (parseInt(colorIndex) + 1);
+                var rgb = packet.colorTable[colorIndex]
+                var rgbColor = "rgb(" + rgb[0] + "," + rgb[1] + "," + rgb[2] + ")";
+                console.log("update " + colorElementId + " to " + rgbColor);
+                document.getElementById(colorElementId).style.backgroundColor = rgbColor;
+              }
+            }
             packetLimit--;
           };
 
           window.currentFile = uploadField.files[0];
-          // cdg.loadFile(uploadField.files[0]);
+          cdg.loadFile(uploadField.files[0]);
         });
       };
 
