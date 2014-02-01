@@ -58,11 +58,18 @@
       window.onload = function() {
         var uploadField = document.getElementById("upload-field");
         var debugOutput = document.getElementById("debug-output");
-        var canvas = document.getElementById("display");
         var audio = document.getElementById("audio");
+        var canvas = document.getElementById("display");
+        var drawingCanvas = canvas.getContext("2d");
+
+        var lastFillColor = null;
 
         window.theCanvas = canvas;
         window.theAudio = audio;
+
+        function rgbColor(arrayOfRGB) {
+          return "rgb(" + arrayOfRGB[0] + "," + arrayOfRGB[1] + "," + arrayOfRGB[2] + ")";
+        }
 
         uploadField.addEventListener("change", function(e) {
           var cdg = new CDG();
@@ -74,17 +81,18 @@
           //  - something ideal to use to render a <canvas> ... this design will sort itself out
           cdg.onPacket = function(packet) {
             if (packetLimit == 0) return;
-            // debugOutput.textContent = debugOutput.textContent + JSON.stringify(packet) + "\n";
+            debugOutput.textContent = debugOutput.textContent + JSON.stringify(packet) + "\n";
+
             if (packet.colorTable) {
-              console.log(packet.colorTable);
-              for (var colorIndex in packet.colorTable) {
+              for (var colorIndex in cdg.colorTable) {
                 var colorElementId = "color" + (parseInt(colorIndex) + 1);
-                var rgb = packet.colorTable[colorIndex]
-                var rgbColor = "rgb(" + rgb[0] + "," + rgb[1] + "," + rgb[2] + ")";
-                console.log("update " + colorElementId + " to " + rgbColor);
-                document.getElementById(colorElementId).style.backgroundColor = rgbColor;
+                document.getElementById(colorElementId).style.backgroundColor = rgbColor(cdg.colorTable[colorIndex]);
               }
+            } else if (packet.fillColor && lastFillColor != packet.fillColor) {
+              drawingCanvas.fillStyle = rgbColor(packet.fillColor);
+              drawingCanvas.fillRect(0, 0, canvas.width, canvas.height);
             }
+
             packetLimit--;
           };
 
