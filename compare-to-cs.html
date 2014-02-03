@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <input id="the-file" type="file" />
+    <script>
+      function readBytes() {
+        var reader = new FileReader();
+
+        reader.onload = function(e) {
+          var arrayBuffer = reader.result;
+          console.log("" + arrayBuffer.byteLength + " bytes");
+
+          var packetSize = 24;
+          var maxReadBytes = (packetSize * 100); // for debugging
+          var packetByteIndicesFilled = 0;
+
+          var processPacket = function(packet) {
+            console.log("Packet " + packet.length);
+            var command = packet[0] & 0x3F;
+            var instruction = packet[1] & 0x3F;
+            console.log("Command/Instruction " + command + " " + instruction);
+          };
+
+          var packet = []; // not performant, just trying to match C# as exactly as possible ...
+          for (var i = 0; i < maxReadBytes; i++) {
+            if (packetByteIndicesFilled < 23) {
+              var bytes = new Uint8Array(arrayBuffer, i, 1); // grab just the 1 byte to be like C#
+              packet[packetByteIndicesFilled] = bytes[0];
+              console.log("Set index " + packetByteIndicesFilled + " in bytes and it is now length: " + packet.length);
+              packetByteIndicesFilled++;
+            } else {
+              processPacket(packet);
+              packetByteIndicesFilled = 0;
+              packet = [];
+            }
+          }
+        };
+
+        var selectedFile = document.getElementById("the-file").files[0];
+        reader.readAsArrayBuffer(selectedFile);
+      }
+    </script>
+  </body>
+</html>
