@@ -8,27 +8,40 @@
 
         reader.onload = function(e) {
           var arrayBuffer = reader.result;
-          console.log("" + arrayBuffer.byteLength + " bytes");
-
           var packetSize = 24;
-          var maxReadBytes = (packetSize * 100); // for debugging
+          var maxReadBytes = (packetSize * 30); // for debugging
           var packetByteIndicesFilled = 0;
 
+          var processTilePacket = function(data, xor) {
+            var color0 = data[0] & 0x0F;
+            var color1 = data[1] & 0x0F;
+            var row = data[2] & 0x1F;
+            var column = data[3] & 0x3F;
+            var type = xor ? "XOR" : "Normal";
+            console.log("(" + type + ") Row: " + row + " Column: " + column);
+          };
+
           var processPacket = function(packet) {
-            console.log("Packet " + packet.length);
             var command = packet[0] & 0x3F;
             var instruction = packet[1] & 0x3F;
-            console.log("Command/Instruction " + command + " " + instruction);
+            var data = [];
+            for (var i = 4; i < 20; i++) {
+              data.push(packet[i]);
+            }
+
+            console.log("Command " + command);
+            console.log("Instruction " + instruction);
+
+            if (command == 9 && (instruction == 6 || instruction == 38))
+              processTilePacket(data, instruction == 6);
           };
 
           var packet = []; // not performant, just trying to match C# as exactly as possible ...
           for (var i = 0; i < maxReadBytes; i++) {
-            if (packetByteIndicesFilled < 23) {
-              var bytes = new Uint8Array(arrayBuffer, i, 1); // grab just the 1 byte to be like C#
-              packet[packetByteIndicesFilled] = bytes[0];
-              console.log("Set index " + packetByteIndicesFilled + " in bytes and it is now length: " + packet.length);
-              packetByteIndicesFilled++;
-            } else {
+            var bytes = new Uint8Array(arrayBuffer, i, 1); // grab just the 1 byte to be like C#
+            packet[packetByteIndicesFilled] = bytes[0];
+            packetByteIndicesFilled++;
+            if (packetByteIndicesFilled == 24) {
               processPacket(packet);
               packetByteIndicesFilled = 0;
               packet = [];
