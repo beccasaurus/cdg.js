@@ -19,19 +19,6 @@
       For now IGNORE BORDER and only render displayable area
     </pre>
     <script>
-      // helpers
-      function arrayMatrix(rows, columns) {
-        var matrix = [];
-        for (var i = 0; i < rows; i++) {
-          var row = [];
-          for (var j = 0; j < columns; j++) {
-            row.push(0);
-          }
-          matrix.push(row);
-        }
-        return matrix;
-      }
-
       // globals
       var display_width = 294;
       var display_height = 204;
@@ -39,10 +26,14 @@
       var tiles_per_column = 4;
       var tile_width = display_width / tiles_per_row;
       var tile_height = display_height / tiles_per_column;
-      var pixelColorIndices = arrayMatrix(display_width, display_height);
-      var pixelColor = arrayMatrix(display_width, display_height);
+      var pixelColorIndices = [];
+      var pixelColor = [];
       var arrayBuffer = null;
       var packetsRead = 0;
+
+      // fill pixelColor[Indices] with 1 slot per available pixel in display area
+      for (var i = 0; i < display_width * display_height; i++) pixelColorIndices.push(0);
+      for (var i = 0; i < display_width * display_height; i++) pixelColor.push(0);
 
       var readFile = function() {
         var reader = new FileReader();
@@ -65,6 +56,13 @@
         }
         console.log("Next tile packet:");
         console.log(packet);
+
+        // process Normal Tile
+        var color0 = packet.data[0] & 0x0F;
+        var color1 = packet.data[1] & 0x0F;
+        var row = packet.data[2] & 0x1F;
+        var column = packet.data[3] & 0x3F;
+        console.log({ color0: color0, color1: color1, row: row, column: column });
       };
 
       // CD+G packet parsing
