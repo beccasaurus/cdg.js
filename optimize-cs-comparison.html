@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <input id="the-file" type="file" />
+    <script>
+      function readBytes() {
+        var reader = new FileReader();
+
+        reader.onload = function(e) {
+          var arrayBuffer = reader.result;
+          var packetSize = 24;
+          var maxReadBytes = (packetSize * 30); // for debugging
+          var packetByteIndicesFilled = 0;
+
+          var processTilePacket = function(data, xor) {
+            var color0 = data[0] & 0x0F;
+            var color1 = data[1] & 0x0F;
+            var row = data[2] & 0x1F;
+            var column = data[3] & 0x3F;
+            var type = xor ? "XOR" : "Normal";
+            console.log("(" + type + ") Row: " + row + " Column: " + column);
+          };
+
+          var processPacket = function(packet) {
+            var command = packet[0] & 0x3F;
+            var instruction = packet[1] & 0x3F;
+            var data = [];
+            for (var i = 4; i < 20; i++) {
+              data.push(packet[i]);
+            }
+
+            console.log("Command " + command);
+            console.log("Instruction " + instruction);
+
+            if (command == 9 && (instruction == 6 || instruction == 38))
+              processTilePacket(data, instruction == 6);
+          };
+
+          for (var i = 0; i < (maxReadBytes / packetSize); i++) {
+            var packet = new Uint8Array(arrayBuffer, i * 24, 24);
+            processPacket(packet);
+          }
+        };
+
+        var selectedFile = document.getElementById("the-file").files[0];
+        reader.readAsArrayBuffer(selectedFile);
+      }
+    </script>
+  </body>
+</html>
