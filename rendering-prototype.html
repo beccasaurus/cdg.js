@@ -4,6 +4,8 @@
     <title>CD+G Rendering Prototype</title>
   </head>
   <body>
+    <input type="file" id="cdg-file" /><br />
+    <canvas id="cdg-canvas" width="294" height="204" style="border: 1px solid black;"></canvas>
     <pre>
       [_] renderNextTile() - go through and find the next tile and puts its pixel indices in the right places
           [_] put indices into array on Normal tile
@@ -16,8 +18,6 @@
       
       For now IGNORE BORDER and only render displayable area
     </pre>
-    <input type="file" id="cdg-file" />
-    <canvas id="cdg-canvas" width="294" height="204"></canvas>
     <script>
       // helpers
       function arrayMatrix(rows, columns) {
@@ -41,14 +41,42 @@
       var tile_height = display_height / tiles_per_column;
       var pixelColorIndices = arrayMatrix(display_width, display_height);
       var pixelColor = arrayMatrix(display_width, display_height);
+      var arrayBuffer = null;
+      var packetsRead = 0;
+
+      var readFile = function() {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+          console.log("onload");
+          window.arrayBuffer = reader.result;
+          window.packetsRead = 0;
+          console.log("Read file into ArrayBuffer");
+          console.log(window.arrayBuffer);
+        };
+        var selectedFile = document.getElementById("cdg-file").files[0];
+        reader.readAsArrayBuffer(selectedFile);
+      }
 
       // render tile functions
       var renderNextTile = function() {
         var packet = getNextPacket();
-        // while (packet.
+        while (packet.instruction != 6) { // only get Normal Tiles for now
+          packet = getNextPacket();
+        }
+        console.log("Next tile packet:");
+        console.log(packet);
       };
 
-      // CD+G packet parsing 
+      // CD+G packet parsing
+      var getNextPacket = function() {
+        var packetBytes = new Uint8Array(arrayBuffer, window.packetsRead * 24, 24)
+        window.packetsRead++;
+        return {
+          command: packetBytes[0] & 0x3F,
+          instruction: packetBytes[1] & 0x3F,
+          data: packetBytes.subarray(4, 16)
+        };
+      }
     </script>
   </body>
 </html>
