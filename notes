@@ -1,0 +1,23 @@
+each tile is 12x6 (12 pixels high x 6 pixels long)
+
+full: 200W x 216H
+
+display: 294W x 204H
+
+[ 17 tiles H ]
+[
+[ 49 tiles W ]
+
+long expectedPacketNo = (long) (cdgPacketsPerMicroSecond * microSeconds);
+
+// 75 sectors per second
+// 4 packets per sector
+final private double cdgPacketsPerMicroSecond = (75.0d * 4.0d) / (1000000.0d)
+
+requestAnimationFrame --> every current browser!
+
+IE11 var handle = window.requestAnimationFrame(callback);
+
+window.cancelAnimationFrame(requestId);
+
+The first parameter of the callback function is aDOMHighResTimeStamp format time. This time parameter isin milliseconds that represents the time when the callback function is called. In Internet Explorer 10, the format follows the latest W3C Timing control for script-based animation. If you want to compare the times or check the system, use window.performance.now to get the current time. . This time isn't comparable with Date.now(), which returns a time value in millisecond since 01 January 1970.

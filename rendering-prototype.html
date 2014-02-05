@@ -1,0 +1,54 @@
+<!DOCTYPE>
+<html>
+  <head>
+    <title>CD+G Rendering Prototype</title>
+  </head>
+  <body>
+    <pre>
+      [_] renderNextTile() - go through and find the next tile and puts its pixel indices in the right places
+          [_] put indices into array on Normal tile
+          [_] put XOR into array on XOR Tile
+      [_] Update to also load color table
+      [_] DRAW
+      [_] track second array of index:RGB color
+      [_] renderNextTiles(N) - render the next X tiles
+      ...
+      
+      For now IGNORE BORDER and only render displayable area
+    </pre>
+    <input type="file" id="cdg-file" />
+    <canvas id="cdg-canvas" width="294" height="204"></canvas>
+    <script>
+      // helpers
+      function arrayMatrix(rows, columns) {
+        var matrix = [];
+        for (var i = 0; i < rows; i++) {
+          var row = [];
+          for (var j = 0; j < columns; j++) {
+            row.push(0);
+          }
+          matrix.push(row);
+        }
+        return matrix;
+      }
+
+      // globals
+      var display_width = 294;
+      var display_height = 204;
+      var tiles_per_row = 6;
+      var tiles_per_column = 4;
+      var tile_width = display_width / tiles_per_row;
+      var tile_height = display_height / tiles_per_column;
+      var pixelColorIndices = arrayMatrix(display_width, display_height);
+      var pixelColor = arrayMatrix(display_width, display_height);
+
+      // render tile functions
+      var renderNextTile = function() {
+        var packet = getNextPacket();
+        // while (packet.
+      };
+
+      // CD+G packet parsing 
+    </script>
+  </body>
+</html>
