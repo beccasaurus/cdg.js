@@ -26,14 +26,10 @@
       var tiles_per_column = 4;
       var tile_width = display_width / tiles_per_row;
       var tile_height = display_height / tiles_per_column;
-      var pixelColorIndices = [];
-      var pixelColor = [];
+      var pixelColorIndices = {}; // for now, store { [x,y] => colorIndex } // TODO optimize
+      // var pixelColors = {}; // for now, store { [x,y] => RGB } // TODO optimize
       var arrayBuffer = null;
       var packetsRead = 0;
-
-      // fill pixelColor[Indices] with 1 slot per available pixel in display area
-      for (var i = 0; i < display_width * display_height; i++) pixelColorIndices.push(0);
-      for (var i = 0; i < display_width * display_height; i++) pixelColor.push(0);
 
       var readFile = function() {
         var reader = new FileReader();
@@ -62,7 +58,28 @@
         var color1 = packet.data[1] & 0x0F;
         var row = packet.data[2] & 0x1F;
         var column = packet.data[3] & 0x3F;
-        console.log({ color0: color0, color1: color1, row: row, column: column });
+
+        // process tiles and add to pixelColorIndices
+        // These commands load a 12 x 6 tile of pixels ...
+        var pixelBytes = packet.data.subarray(4, 16) // 12 bytes;
+        for (var i = 0; i < pixelBytes.byteLength; i++) {
+          var tileByte = pixelBytes[i] & 0x3F
+          for (var j = 0; i < 6; i++) { // 6 pixels per byte
+            var pixelColorChoiceByte = (tileByte >> (5 - j)) & 0x01;
+            var pixelColorIndex = pixelColorChoiceByte == 0 ? color0 : color1;
+            // http://jbum.com/cdg_revealed.html
+            // Row and Column describe the position of the tile in tile coordinate space.
+            // To convert to pixels, multiply row by 12, and column by 6.
+            var rowPixel = row * 12;
+            var columnPixel = column * 6;
+            // TODO for 12x6 we need to add column/row +1 ...
+            // var tiles_per_row = 6;
+            // var tiles_per_column = 4;
+            // assuming ... width > height ... 12 bytes > 6 per ... 12 is W 6 is H
+            window.pixelColorIndices[[columnPixel + i, rowPixel + j]] = pixelColorIndex;
+            console.log("X,Y " + (columnPixel + i) + "," + (rowPixel + j) + " color: " + pixelColorIndex);
+          }
+        }
       };
 
       // CD+G packet parsing
@@ -72,7 +89,7 @@
         return {
           command: packetBytes[0] & 0x3F,
           instruction: packetBytes[1] & 0x3F,
-          data: packetBytes.subarray(4, 16)
+          data: packetBytes.subarray(4, 20) // 16 bytes
         };
       }
     </script>
