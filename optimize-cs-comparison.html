@@ -9,8 +9,6 @@
         reader.onload = function(e) {
           var arrayBuffer = reader.result;
           var packetSize = 24;
-          var maxReadBytes = (packetSize * 30); // for debugging
-          var packetByteIndicesFilled = 0;
 
           var processTilePacket = function(data, xor) {
             var color0 = data[0] & 0x0F;
@@ -24,10 +22,7 @@
           var processPacket = function(packet) {
             var command = packet[0] & 0x3F;
             var instruction = packet[1] & 0x3F;
-            var data = [];
-            for (var i = 4; i < 20; i++) {
-              data.push(packet[i]);
-            }
+            var data = packet.subarray(4, 16);
 
             console.log("Command " + command);
             console.log("Instruction " + instruction);
@@ -36,7 +31,8 @@
               processTilePacket(data, instruction == 6);
           };
 
-          for (var i = 0; i < (maxReadBytes / packetSize); i++) {
+          var packetsToRead = 30; // for debugging
+          for (var i = 0; i < packetsToRead; i++) {
             var packet = new Uint8Array(arrayBuffer, i * 24, 24);
             processPacket(packet);
           }
