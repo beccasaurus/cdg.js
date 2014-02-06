@@ -42,14 +42,7 @@
         reader.readAsArrayBuffer(selectedFile);
       }
 
-      var loadColorTable = function(packet){
-        if (packet.instruction != 30 && packet.instruction != 31)
-          return;
-
-        var indexOffset = 0;
-        if (packet.instruction == 31)
-          indexOffset = 8;
-
+      var loadColorTable = function(packet, offset){
         for (var i = 0; i < 8; i++) {
           var color = (packet.data[2 * i] & 0x3F) << 8
           color = (packet.data[(2 * i) + 1] & 0x3F)
@@ -59,7 +52,7 @@
           green = ((color & 0x00F0) >> 4) * 17
           blue = ((color & 0x000F)) * 17
           
-          window.colorTable[i + indexOffset] = [red, green, blue];
+          window.colorTable[i + offset] = [red, green, blue];
         }
       };
 
@@ -71,7 +64,6 @@
       var canvasContext = canvas.getContext("2d");
       var draw = function() {
         // full canvas for now ...
-        canvasContext.clearRect(0, 0, canvas.width, canvas.height);
         for (var pixelKey in window.pixelColors) {
           var xy = pixelFromKey(pixelKey);
           var x = xy[0];
@@ -88,16 +80,25 @@
         canvasContext.save();
       };
 
-      // render tile functions
-      var renderNextTile = function() {
+      var processNextPacket = function() {
         var packet = getNextPacket();
-        loadColorTable(packet);
+        switch (packet.instruction) {
+          case 1: setScreenColor(packet); break;
+          case 6: processTilePacket(packet); break;
+          case 30: loadColorTable(packet, 0); break;
+          case 31: loadColorTable(packet, 8); break;
+          case 38: processTilePacket(packet, true);
+          default: break;
+        };
+      };
 
-        while (packet.instruction != 6) { // only get Normal Tiles for now
-          packet = getNextPacket();
-          loadColorTable(packet);
-        }
+      var processPackets = function(n) {
+        for (var i = 0; i < n; i++)
+          processNextPacket();
+        draw();
+      };
 
+      var processTilePacket = function(packet, xor) {
         // process Normal Tile
         var color0 = packet.data[0] & 0x0F;
         var color1 = packet.data[1] & 0x0F;
@@ -112,6 +113,9 @@
           for (var j = 0; j < 6; j++) { // 6 pixels per byte
             var pixelColorChoiceByte = (tileByte >> (5 - j)) & 0x01;
             var pixelColorIndex = pixelColorChoiceByte == 0 ? color0 : color1;
+            if (xor) {
+              pixelColorIndex = window.pixelColorIndices[pixelColorIndex] ^ pixelColorIndex;
+            }
             // http://jbum.com/cdg_revealed.html
             // Row and Column describe the position of the tile in tile coordinate space.
             // To convert to pixels, multiply row by 12, and column by 6.
@@ -125,6 +129,23 @@
             window.pixelColorIndices[keyForPixel(columnPixel + i, rowPixel + j)] = pixelColorIndex;
             window.pixelColors[keyForPixel(columnPixel + i, rowPixel + j)] = window.colorTable[pixelColorIndex];
           }
+        }
+      };
+
+      var lastScreenColorIndex = null;
+      var setScreenColor = function(packet) {
+        var colorIndex = packet[0] & 0x0F;
+        if (lastScreenColorIndex != colorIndex) {
+          lastScreenColorIndex = colorIndex;
+          var rgb = window.colorTable[colorIndex];
+          if (! rgb) {
+            console.log("colorTable has no index: " + colorIndex);
+            return;
+          }
+          var rgbString = "rgb(" + rgb[0] + "," + rgb[1] + "," + rgb[2] + ")";
+          canvasContext.fillStyle = rgbString;
+          canvasContext.fillRect(0, 0, canvas.width, canvas.height);
+          canvasContext.save();
         }
       };
 
