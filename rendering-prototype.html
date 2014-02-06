@@ -28,6 +28,7 @@
       var tile_height = display_height / tiles_per_column;
       var pixelColorIndices = {}; // for now, store { [x,y] => colorIndex } // TODO optimize
       var pixelColors = {}; // for now, store { [x,y] => RGB } // TODO optimize
+      var dirtyPixels = [];
       var arrayBuffer = null;
       var packetsRead = 0;
       var colorTable = {}; // 0-15 => color (bytes or rgb?)
@@ -63,12 +64,15 @@
       var canvas = document.getElementById("cdg-canvas");
       var canvasContext = canvas.getContext("2d");
       var draw = function() {
-        // full canvas for now ...
-        for (var pixelKey in window.pixelColors) {
+        for (var i in window.dirtyPixels) {
+          var pixelKey = window.dirtyPixels[i];
           var xy = pixelFromKey(pixelKey);
           var x = xy[0];
           var y = xy[1];
           var rgb = window.pixelColors[pixelKey];
+          if (! rgb) {
+            console.log("Couldn't find pixel color for key: " + pixelKey);
+          }
           var rgbString = "rgb(" + rgb[0] + "," + rgb[1] + "," + rgb[2] + ")";
           canvasContext.fillStyle = rgbString;
           if (x < minX) minX = x;
@@ -78,6 +82,7 @@
           canvasContext.fillRect(x, y, 1, 1);
         }
         canvasContext.save();
+        window.dirtyPixels = [];
       };
 
       var processNextPacket = function() {
@@ -126,8 +131,11 @@
             // var tiles_per_column = 4;
             // assuming ... width > height ... 12 bytes > 6 per ... 12 is W 6 is H
             // console.log(["pixel", columnPixel + i, rowPixel + j, window.colorTable[pixelColorIndex]]);
-            window.pixelColorIndices[keyForPixel(columnPixel + i, rowPixel + j)] = pixelColorIndex;
-            window.pixelColors[keyForPixel(columnPixel + i, rowPixel + j)] = window.colorTable[pixelColorIndex];
+            var pixelKey = keyForPixel(columnPixel + i, rowPixel + j);
+            // console.log([pixelKey, columnPixel + i, rowPixel + j]);
+            window.pixelColorIndices[pixelKey] = pixelColorIndex;
+            window.pixelColors[pixelKey] = window.colorTable[pixelColorIndex];
+            window.dirtyPixels.push(pixelKey);
           }
         }
       };
