@@ -7,12 +7,12 @@
     <input type="file" id="cdg-file" /><br />
     <canvas id="cdg-canvas" width="294" height="204" style="border: 1px solid black;"></canvas>
     <pre>
-      [_] renderNextTile() - go through and find the next tile and puts its pixel indices in the right places
-          [_] put indices into array on Normal tile
+      [X] renderNextTile() - go through and find the next tile and puts its pixel indices in the right places
+          [X] put indices into array on Normal tile
           [_] put XOR into array on XOR Tile
-      [_] Update to also load color table
-      [_] DRAW
-      [_] track second array of index:RGB color
+      [X] Update to also load color table
+      [X] DRAW
+      [X] track second array of index:RGB color
       [_] renderNextTiles(N) - render the next X tiles
       ...
       
@@ -27,31 +27,76 @@
       var tile_width = display_width / tiles_per_row;
       var tile_height = display_height / tiles_per_column;
       var pixelColorIndices = {}; // for now, store { [x,y] => colorIndex } // TODO optimize
-      // var pixelColors = {}; // for now, store { [x,y] => RGB } // TODO optimize
+      var pixelColors = {}; // for now, store { [x,y] => RGB } // TODO optimize
       var arrayBuffer = null;
       var packetsRead = 0;
+      var colorTable = {}; // 0-15 => color (bytes or rgb?)
 
       var readFile = function() {
         var reader = new FileReader();
         reader.onload = function(e) {
-          console.log("onload");
           window.arrayBuffer = reader.result;
           window.packetsRead = 0;
-          console.log("Read file into ArrayBuffer");
-          console.log(window.arrayBuffer);
         };
         var selectedFile = document.getElementById("cdg-file").files[0];
         reader.readAsArrayBuffer(selectedFile);
       }
 
+      var loadColorTable = function(packet){
+        if (packet.instruction != 30 && packet.instruction != 31)
+          return;
+
+        var indexOffset = 0;
+        if (packet.instruction == 31)
+          indexOffset = 8;
+
+        for (var i = 0; i < 8; i++) {
+          var color = (packet.data[2 * i] & 0x3F) << 8
+          color = (packet.data[(2 * i) + 1] & 0x3F)
+          color = ((color & 0x3F00) >> 2) | (color & 0x003F)
+
+          red = ((color & 0x0F00) >> 8) * 17 // why 17 not 16 ... coming through as 0 in most cases ... (try other cdg)
+          green = ((color & 0x00F0) >> 4) * 17
+          blue = ((color & 0x000F)) * 17
+          
+          window.colorTable[i + indexOffset] = [red, green, blue];
+        }
+      };
+
+      var minX = 9999;
+      var minY = 9999;
+      var maxX = 0;
+      var maxY = 0;
+      var canvas = document.getElementById("cdg-canvas");
+      var canvasContext = canvas.getContext("2d");
+      var draw = function() {
+        // full canvas for now ...
+        canvasContext.clearRect(0, 0, canvas.width, canvas.height);
+        for (var pixelKey in window.pixelColors) {
+          var xy = pixelFromKey(pixelKey);
+          var x = xy[0];
+          var y = xy[1];
+          var rgb = window.pixelColors[pixelKey];
+          var rgbString = "rgb(" + rgb[0] + "," + rgb[1] + "," + rgb[2] + ")";
+          canvasContext.fillStyle = rgbString;
+          if (x < minX) minX = x;
+          if (y < minY) minY = y;
+          if (x > maxX) maxX = x;
+          if (y > maxY) maxY = y;
+          canvasContext.fillRect(x, y, 1, 1);
+        }
+        canvasContext.save();
+      };
+
       // render tile functions
       var renderNextTile = function() {
         var packet = getNextPacket();
+        loadColorTable(packet);
+
         while (packet.instruction != 6) { // only get Normal Tiles for now
           packet = getNextPacket();
+          loadColorTable(packet);
         }
-        console.log("Next tile packet:");
-        console.log(packet);
 
         // process Normal Tile
         var color0 = packet.data[0] & 0x0F;
@@ -64,7 +109,7 @@
         var pixelBytes = packet.data.subarray(4, 16) // 12 bytes;
         for (var i = 0; i < pixelBytes.byteLength; i++) {
           var tileByte = pixelBytes[i] & 0x3F
-          for (var j = 0; i < 6; i++) { // 6 pixels per byte
+          for (var j = 0; j < 6; j++) { // 6 pixels per byte
             var pixelColorChoiceByte = (tileByte >> (5 - j)) & 0x01;
             var pixelColorIndex = pixelColorChoiceByte == 0 ? color0 : color1;
             // http://jbum.com/cdg_revealed.html
@@ -76,10 +121,22 @@
             // var tiles_per_row = 6;
             // var tiles_per_column = 4;
             // assuming ... width > height ... 12 bytes > 6 per ... 12 is W 6 is H
-            window.pixelColorIndices[[columnPixel + i, rowPixel + j]] = pixelColorIndex;
-            console.log("X,Y " + (columnPixel + i) + "," + (rowPixel + j) + " color: " + pixelColorIndex);
+            // console.log(["pixel", columnPixel + i, rowPixel + j, window.colorTable[pixelColorIndex]]);
+            window.pixelColorIndices[keyForPixel(columnPixel + i, rowPixel + j)] = pixelColorIndex;
+            window.pixelColors[keyForPixel(columnPixel + i, rowPixel + j)] = window.colorTable[pixelColorIndex];
           }
         }
+      };
+
+      // can only store strings as keys, so use this to grab x & y for now ... can optimize later ... will use array to store * values instead of map
+      var keyForPixel = function(x, y) {
+        return (x * 1000) + y;
+      };
+
+      var pixelFromKey = function(key) {
+        var x = parseInt(key / 1000);
+        var y = key % 1000;
+        return [x, y];
       };
 
       // CD+G packet parsing
