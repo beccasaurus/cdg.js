@@ -40,6 +40,9 @@ Offline
  - ?
    - Star Ratings 
    - Notifications
+   - Lock screen (keeping 2nd screen going)
+   - Audio key control
+   - Remember user's key control preference
 
 Online Only
 -----------
@@ -63,18 +66,28 @@ Online Only
 
  - Venues
    - Create
+   - Venue Playlist view/editor
+   - Venue Playlist has singer(s) associated with each item
    - Search by name
+   - User can customize their name per venue (persisted)
    - Make visible online
    - Make searchable from exact IP Address
    - Make searchable from GPS
-   - Invite Others
-   - Remove Others
+   - Invite Guest
+   - Invite Admin
+   - Remove User
    - Accept Invites
+   - Set/unset Admin (can't unset last - must be 1)
    - Open Room to local IP
    - Open Room to nearby GPS
    - Open Room to all
    - Open room to those with static password
      - Change password with option to invalidate existing or not
+   - Queue your own song to play
+     - "Allow screen sharing" to all guests
+     - "Allow screen sharing" to certain guests
+     - Second guest gets logged in - login with one time token that allows limited access to the guest's account - ONLY media will play.  This doesn't play the other person's media.  It logs in as the other person to allow screen sharing 2nd monitor.  NO file browsing other people's libraries.
+     - Actually, this doesn't need a second tab, it can be the video player in browser.  This also allows for users to karaoke with one another while in separate locations.  1 plays.  It plays on other people's screens.  Access locked down to one time to prevent sharing.  Also needs to prevent any way of possible cookie hijacking.  Use separate impersonation cookie with 1 time session, max length track time (+ buffer eg. 1 minute) ... or something simpler but still restrictive.  Similar model to turntable.fm.  People can upload their own tracks which can be played.  Note: the upload costs crippled them.  So don't run bytes through the server if they can be fetched via local Google Drive / DropBox JS client ... unless this shared API creds in clear text ... in which case we MUST use server to prevent these (or any other pieces of PII) from being persisted in any way on the host machine.  even pub/key could be used to handshake before sending cleartext bytes (over SSL) - meh ... one time token is likely totally enough.  Force SSL.
 
  ?
   - View Most Played
