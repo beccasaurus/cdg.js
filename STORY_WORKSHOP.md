@@ -1,6 +1,10 @@
 Karaoke App Story Workshop
 ==========================
 
+Use Cases
+---------
+ - Given the functionality, can also be used as a shared audio player - anything the user can play from their session can ideally be fair game ... can we iframe to disallow access to JS variables?  If so, we should encode/unencode them so they never appear as plain text.  This way local JS Drive/YouTube/FB/etc SDKs can possibly safely be used?  To be secure, likely need to run through our Server API backend to get short lived tokens to render - don't want to render app key / secret into a page someone could HTML inspect!
+
 Research
 --------
 
@@ -17,8 +21,10 @@ Offline
  - Play
    - Controls
    - CD+G Zip
+   - Full screen CD+G
    - MP4
    - MP3
+   - Read MP3 tags (MP3 & CD+G)
    - In separate window
    - Full screen in separate window
    - Render CD+G locally too - without audio
@@ -104,6 +110,7 @@ Chrome Extension Only
 Packaged App Only
 -----------------
 
+ - Auto-Position Windows
  - Sync locally with Google Drive
 
 Server API
