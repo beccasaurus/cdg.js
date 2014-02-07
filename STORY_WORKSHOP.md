@@ -12,6 +12,7 @@ Offline
  - Library
    - File Browser
    - Play from
+   - Import file
 
  - Play
    - Controls
@@ -23,8 +24,14 @@ Offline
    - Create new
    - Add Songs
    - Play from
-   
+
+ - Users
+   - Create New (anonymous guest)
+   - Switch Users
+   - Switch to new guest (N guests allowed)
+
  - ?
+   - Star Ratings 
    - Notifications
 
 Online Only
@@ -43,11 +50,17 @@ Online Only
  - Playlists
    - Browse YouTube Playlists
    - Play from YouTube Playlist
+   - Share with user
+   - Share to Spotify
+   - Share to Facebook
+
+ ?
+  - View Most Played
 
 Desktop Chrome Only
 -------------------
 
- - Library: Upload Directory
+ - Library: Import Directory
 
 Chrome Extension Only
 ---------------------
@@ -55,15 +68,12 @@ Chrome Extension Only
 Packaged App Only
 -----------------
 
-
-Mobile Client App
------------------
-
-   
-
+ - Sync locally with Google Drive
 
 Server API
 ----------
 
-Chrome App Only
----------------
+Notes
+-----
+
+ - Android streaming to Chromecast likely to come in Android >= 4.4.1
