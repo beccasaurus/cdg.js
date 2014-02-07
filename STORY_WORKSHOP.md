@@ -98,6 +98,10 @@ Online Only
  ?
   - View Most Played
   - View Highest Rated
+  - In-app Friends?
+  - Browse queue and star/favorite other singer's performances or star/follow the singer
+  - Maybe actually NO RATINGS ... that undermines Karaoke ... but maybe Like's.  No 1/5 stars --> harsh
+  - Like.  Follow.
 
 Desktop Chrome Only
 -------------------
@@ -124,4 +128,6 @@ Server API
 Notes
 -----
 
+ - gzip streaming bytes
+ - ECDSA asymmetric key available in pure Dart
  - Android streaming to Chromecast likely to come in Android >= 4.4.1
