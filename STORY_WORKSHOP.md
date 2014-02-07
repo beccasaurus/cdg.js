@@ -54,8 +54,24 @@ Online Only
    - Share to Spotify
    - Share to Facebook
 
+ - Venues
+   - Create
+   - Search by name
+   - Make visible online
+   - Make searchable from exact IP Address
+   - Make searchable from GPS
+   - Invite Others
+   - Remove Others
+   - Accept Invites
+   - Open Room to local IP
+   - Open Room to nearby GPS
+   - Open Room to all
+   - Open room to those with static password
+     - Change password with option to invalidate existing or not
+
  ?
   - View Most Played
+  - View Highest Rated
 
 Desktop Chrome Only
 -------------------
@@ -72,6 +88,11 @@ Packaged App Only
 
 Server API
 ----------
+
+ - Credential references
+ - Play data
+ - Venues
+ - Find Nearby Venues
 
 Notes
 -----
