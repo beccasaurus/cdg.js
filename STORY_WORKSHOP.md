@@ -18,12 +18,19 @@ Offline
    - Controls
    - CD+G Zip
    - MP4
+   - MP3
    - In separate window
+   - Full screen in separate window
+   - Render CD+G locally too - without audio
+   - ? View MP4 locally too (paused frames if not full FPS?) - without audio / muted
 
  - Playlists
    - Create new
    - Add Songs
    - Play from
+   - Pause between songs
+   - Play MP3 during pause
+   - Play random MP3 during pause
 
  - Users
    - Create New (anonymous guest)
