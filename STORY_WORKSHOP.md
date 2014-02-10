@@ -141,3 +141,34 @@ Notes
  - gzip streaming bytes
  - ECDSA asymmetric key available in pure Dart
  - Android streaming to Chromecast likely to come in Android >= 4.4.1
+
+Professional Karaoke DJ Features
+--------------------------------
+
+ - Read from MP3s/Videos/Media to fill time between sets
+ - Can maybe choose parts of tracks to fade in/out of for these in-betweens
+ - Built in screen showing N upcoming singers
+ - (Ad rotation?)
+ - True customization of all these screens (Angular-y templates)
+ - True customization of EVERY part of the main app UI!  (all main views - HTML/CSS) - allowed to rebrand to look different and tricked out - and show the different things you do/don't want to see
+ - Some kind of built in more user friendly reorganization/color theme ... ?  "Skin support"
+ - Instant each search
+ - Search autocomplete on song/artist name
+   - GAE Search API - but could also only or additionally use IndexedDb locally for FAST *and* works with flaky internet connection
+ - Offline support for everything (except playing filed that haven't downloaded yet, for instance)
+ - FULL sycing to Drive (with Packaged App)
+
+Data Models
+-----------
+
+ - User
+   - username
+   - venues
+     - venue_id
+     - nickname?
+   - songs
+     - ...
+
+SO many ways to build ... needs all common UI use cases thought out first for who owns what ...
+
+
