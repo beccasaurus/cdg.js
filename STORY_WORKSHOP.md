@@ -18,6 +18,7 @@ Prototypes
  - [_] Read MP3 and CDG out of zip bytes
  - [_] Drag and drop local directory of zip files from Chrome
  - [_] Full screen canvas and request animation frame polling for draw bytes (time loop tile w/ ref to docs)
+ - mp3 pitch adjustment
 
 Offline
 -------
