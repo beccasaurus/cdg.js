@@ -219,11 +219,12 @@
             if (xor) {
               pixelColorIndex = window.pixelColorIndices[pixelColorIndex] ^ pixelColorIndex;
             }
-            var x = columnPixel + i;
-            var y = rowPixel + j;
+            var y = rowPixel + i; // 12 rows
+            var x = columnPixel + j; // 6 columns
             var pixelKey = keyForPixel(x, y);
             window.pixelColorIndices[pixelKey] = pixelColorIndex;
             window.pixelColors[pixelKey] = window.colorTable[pixelColorIndex];
+            // console.log(["DIRTY", pixelKey]);
             window.dirtyPixels.push(pixelKey);
           }
         }
