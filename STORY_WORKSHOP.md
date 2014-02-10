@@ -157,6 +157,10 @@ Professional Karaoke DJ Features
    - GAE Search API - but could also only or additionally use IndexedDb locally for FAST *and* works with flaky internet connection
  - Offline support for everything (except playing filed that haven't downloaded yet, for instance)
  - FULL sycing to Drive (with Packaged App)
+ - Singer rotation modes
+ - Edit all singer's selections
+ - Say singer has left
+ - UI prompt after song has ended "Click to proceed to next song: [song] by [person1, person2...]"
 
 Data Models
 -----------
@@ -171,4 +175,6 @@ Data Models
 
 SO many ways to build ... needs all common UI use cases thought out first for who owns what ...
 
+Prototype first in Heroku-deployable Rails JSON API.  Or Rack + jbuilder.
 
+Build UI.  Queries will come out of that.  UI must be built.  THEN you'll know the API.  And THEN can rebuild a greenfield go/GAE.
