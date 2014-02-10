@@ -17,6 +17,7 @@ Prototypes
  - [_] Find and read bytes from zip on Google Drive using JS client with authenticated OAuth2 access token
  - [_] Read MP3 and CDG out of zip bytes
  - [_] Drag and drop local directory of zip files from Chrome
+ - [_] Full screen canvas and request animation frame polling for draw bytes (time loop tile w/ ref to docs)
 
 Offline
 -------
