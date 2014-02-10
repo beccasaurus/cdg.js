@@ -161,6 +161,10 @@ Professional Karaoke DJ Features
  - Edit all singer's selections
  - Say singer has left
  - UI prompt after song has ended "Click to proceed to next song: [song] by [person1, person2...]"
+ - UI must work well on touch screens (windows 8 / pixel) including at high resolution
+ - UI must work well on tablet/phone
+ - Run KJ from laptop but control it remotely from your phone or tablet
+ - Allow a tablet to be shared that people can use to quick switch or create users and pick songs - easy prompted user switching (w/ quick timeout on screen disabling if possible) - same app ... if you own a venue, get you can see the admin stuffs ... else you can't.  but everyone can start their own room and set access settings.
 
 Data Models
 -----------
