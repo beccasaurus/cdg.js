@@ -46,6 +46,46 @@
     <script>
       var colorTableTable = document.getElementById("color-table");
     </script>
+    <style>
+      #tile-previews td { width: 5px; height: 5px; }
+    </style>
+    <table id="tile-previews" border="1"></table>
+    <script>
+      var tilePreviews = document.getElementById("tile-previews");
+      var tileHeight = 12;
+      var tileWidth = 6;
+
+      // how many tiles to render?
+      var tilesAcross = 5;
+      var tilesDown = 3;
+
+      // setup table to show these
+      var totalColumns = tileWidth * tilesAcross;
+      var totalRows = tileHeight * tilesDown;
+      for (var i = 0; i < totalRows; i++) {
+        var tr = document.createElement("tr");
+        for (var j = 0; j < totalColumns; j++) {
+          var td = document.createElement("td");
+          tr.appendChild(td);
+        }
+        tilePreviews.appendChild(tr);
+      }
+
+      // okay, configure variables to define the x/y min/max values we want to render in our preview
+      var startingXPixel = 0;
+      var startingYPixel = 0;
+      var endingXPixel = startingXPixel + totalColumns;
+      var endingYPixel = startingYPixel + totalRows;
+      console.log(["Updates for X/Y", startingXPixel, endingXPixel, startingYPixel, endingYPixel]);
+
+      var updateTilePreviews = function(x, y, rgbString) {
+        if (x >= startingXPixel && x < endingXPixel && y >= startingYPixel && y < endingYPixel) {
+          //var relativeX = x % tileWidth;
+          //var relativeY = y % tileHeight;
+          tilePreviews.children[y].children[x].style.backgroundColor = rgbString;
+        }
+      };
+    </script>
     <!-- this table has 18 rows of 50 columns each, representing the 900 tiles on the 300x216 renderable display (each 12x6)-->
     <!-- every time the code updates that column, we bump an index so we can see the count of a draw anywhere in a given tile -->
     <!-- looking to make sure i'm getting draws in all the appropriate sections of the screen -->
@@ -69,7 +109,6 @@
         var td = tileUpdatesTable.children[tileRow].children[tileColumn];
         td.textContent = parseInt(td.textContent) + 1;
       }
-      <table id="tile1"></table>
     </script>
     <script>
       // globals
@@ -105,7 +144,6 @@
           red = ((color & 0x0F00) >> 8) * 17 // why 17 not 16 ... coming through as 0 in most cases ... (try other cdg)
           green = ((color & 0x00F0) >> 4) * 17
           blue = ((color & 0x000F)) * 17
-          console.log([red, green, blue]);
           
           colorTableTable.children[0].children[0].children[i + offset].style.backgroundColor = "rgb(" + red + "," + green + "," + blue + ")";
           window.colorTable[i + offset] = [red, green, blue];
@@ -135,6 +173,7 @@
           if (x > maxX) maxX = x;
           if (y > maxY) maxY = y;
           updateTableTile(x, y);
+          updateTilePreviews(x, y, rgbString);
           canvasContext.fillRect(x, y, 1, 1);
         }
         canvasContext.save();
@@ -163,8 +202,11 @@
         // process Normal Tile
         var color0 = packet.data[0] & 0x0F;
         var color1 = packet.data[1] & 0x0F;
-        var row = packet.data[2] & 0x1F;
+        var row = packet.data[2] & 0x1F; // VERIFY ...
         var column = packet.data[3] & 0x3F;
+
+        var rowPixel = row * 12; // starting position
+        var columnPixel = column * 6;
 
         // process tiles and add to pixelColorIndices
         // These commands load a 12 x 6 tile of pixels ...
@@ -177,18 +219,9 @@
             if (xor) {
               pixelColorIndex = window.pixelColorIndices[pixelColorIndex] ^ pixelColorIndex;
             }
-            // http://jbum.com/cdg_revealed.html
-            // Row and Column describe the position of the tile in tile coordinate space.
-            // To convert to pixels, multiply row by 12, and column by 6.
-            var rowPixel = row * 12;
-            var columnPixel = column * 6;
-            // TODO for 12x6 we need to add column/row +1 ...
-            // var tiles_per_row = 6;
-            // var tiles_per_column = 4;
-            // assuming ... width > height ... 12 bytes > 6 per ... 12 is W 6 is H
-            // console.log(["pixel", columnPixel + i, rowPixel + j, window.colorTable[pixelColorIndex]]);
-            var pixelKey = keyForPixel(columnPixel + i, rowPixel + j);
-            // console.log([pixelKey, columnPixel + i, rowPixel + j]);
+            var x = columnPixel + i;
+            var y = rowPixel + j;
+            var pixelKey = keyForPixel(x, y);
             window.pixelColorIndices[pixelKey] = pixelColorIndex;
             window.pixelColors[pixelKey] = window.colorTable[pixelColorIndex];
             window.dirtyPixels.push(pixelKey);
