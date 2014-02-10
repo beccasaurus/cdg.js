@@ -89,6 +89,7 @@ Online Only
    - Make visible online
    - Make searchable from exact IP Address
    - Make searchable from GPS
+   - Search nearby triggers Geo request 1st time, always send IP.  Send geo when available.
    - Invite Guest
    - Invite Admin
    - Remove User
