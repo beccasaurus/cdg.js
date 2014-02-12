@@ -5,6 +5,22 @@
   </head>
   <body>
     <input type="file" id="cdg-file" /><br />
+    <!--
+    <style>
+      :-webkit-full-screen {
+        width: 100% !important;
+      }
+      :-moz-full-screen {
+        width: 100% !important;
+      }
+      :-webkit-full-screen .tohide {
+        display: none; /* While in fullscreen, hide any children with class 'tohide' */
+      }
+      :-moz-full-screen .tohide {
+        display: none; /* While in fullscreen, hide any children with class 'tohide' */
+      }
+    </style>
+    -->
     <script>
       function start() {
         readFile();
@@ -17,6 +33,7 @@
         window.clearInterval(window.drawInterval);
       }
     </script>
+    <button onclick="fullScreen()">Full Screen</button>
     <button onclick="start()">Start</button>
     <button onclick="stop()">Stop</button>
     <!-- <canvas id="cdg-canvas" width="294" height="204" style="border: 1px solid black;"></canvas> -->
@@ -76,7 +93,6 @@
       var startingYPixel = 0;
       var endingXPixel = startingXPixel + totalColumns;
       var endingYPixel = startingYPixel + totalRows;
-      console.log(["Updates for X/Y", startingXPixel, endingXPixel, startingYPixel, endingYPixel]);
 
       var updateTilePreviews = function(x, y, rgbString) {
         if (x >= startingXPixel && x < endingXPixel && y >= startingYPixel && y < endingYPixel) {
@@ -156,6 +172,43 @@
       var maxY = 0;
       var canvas = document.getElementById("cdg-canvas");
       var canvasContext = canvas.getContext("2d");
+
+      var fullScreen = function() {
+        fullscreenify(canvas);
+        canvas.webkitRequestFullScreen();
+      };
+
+      function fullscreenify(canvas) {
+        var style = canvas.getAttribute('style') || '';
+
+        // window.addEventListener('resize', function () {resize(canvas);}, false);
+
+        resize(canvas);
+
+        function resize(canvas) {
+          var scale = {x: 1, y: 1};
+          scale.x = (window.innerWidth - 10) / canvas.width;
+          scale.y = (window.innerHeight - 10) / canvas.height;
+
+          if (scale.x < 1 || scale.y < 1) {
+            scale = '1, 1';
+            } else if (scale.x < scale.y) {
+            scale = scale.x + ', ' + scale.x;
+            } else {
+            scale = scale.y + ', ' + scale.y;
+          }
+
+          console.log("SCALE");
+          console.log(scale);
+
+          // canvas.setAttribute('style', '-webkit-transform-origin: center top; -webkit-transform: scale3d(1.5, 1.5, 1); margin-top: -50px;');
+
+          canvas.setAttribute('style', style + ' ' + 'margin-top: -200px; -ms-transform-origin: center top; -webkit-transform-origin: center top; -moz-transform-origin: center top; -o-transform-origin: center top; transform-origin: center top; -ms-transform: scale(' + scale + '); -webkit-transform: scale3d(' + scale + ', 1); -moz-transform: scale(' + scale + '); -o-transform: scale(' + scale + '); transform: scale(' + scale + ');');
+
+          // canvas.setAttribute('style', style + ' ' + '-ms-transform-origin: center top; -webkit-transform-origin: center top; -moz-transform-origin: center top; -o-transform-origin: center top; transform-origin: center top; -ms-transform: scale(' + scale + '); -webkit-transform: scale3d(' + scale + ', 1); -moz-transform: scale(' + scale + '); -o-transform: scale(' + scale + '); transform: scale(' + scale + ');');
+        }
+      }
+
       var draw = function() {
         for (var i in window.dirtyPixels) {
           var pixelKey = window.dirtyPixels[i];
@@ -180,15 +233,31 @@
         window.dirtyPixels = [];
       };
 
+      var unsupportedInstructions = {};
       var processNextPacket = function() {
         var packet = getNextPacket();
         switch (packet.instruction) {
-          case 1: setScreenColor(packet); break;
-          case 6: processTilePacket(packet); break;
-          case 30: loadColorTable(packet, 0); break;
-          case 31: loadColorTable(packet, 8); break;
-          case 38: processTilePacket(packet, true);
-          default: break;
+          case 1:
+            setScreenColor(packet);
+            break;
+          case 6:
+            processTilePacket(packet);
+            break;
+          case 30:
+            loadColorTable(packet, 0);
+            break;
+          case 31:
+            loadColorTable(packet, 8);
+            break;
+          case 38:
+            processTilePacket(packet, true);
+            break;
+          default:
+            if (! unsupportedInstructions[packet.instruction]) {
+              unsupportedInstructions[packet.instruction] = true;
+              console.log("Unsupported Instruction: " + packet.instruction);
+            }
+            break;
         };
       };
 
@@ -224,7 +293,6 @@
             var pixelKey = keyForPixel(x, y);
             window.pixelColorIndices[pixelKey] = pixelColorIndex;
             window.pixelColors[pixelKey] = window.colorTable[pixelColorIndex];
-            // console.log(["DIRTY", pixelKey]);
             window.dirtyPixels.push(pixelKey);
           }
         }
@@ -233,32 +301,42 @@
       var lastScreenColorIndex = null;
       var setScreenColor = function(packet) {
         var colorIndex = packet[0] & 0x0F;
-        if (lastScreenColorIndex != colorIndex) {
-          lastScreenColorIndex = colorIndex;
-          var rgb = window.colorTable[colorIndex];
-          if (! rgb) {
-            console.log("colorTable has no index: " + colorIndex);
-            return;
-          }
-          var rgbString = "rgb(" + rgb[0] + "," + rgb[1] + "," + rgb[2] + ")";
-          canvasContext.fillStyle = rgbString;
-          canvasContext.fillRect(0, 0, canvas.width, canvas.height);
-          canvasContext.save();
+
+        // manually redraw right away - reset dirty tracking
+        window.dirtyPixels = [];
+
+        // update every pixel color's index to be the screen color (for XOR support)
+        for (var i in window.pixelColorIndices) {
+          window.pixelColorIndices[i] = colorIndex;
         }
+
+        // update exery pixel RGB to be this color too (not REALLY necessary?)
+        var rgb = window.colorTable[colorIndex];
+        if (! rgb) {
+          console.log("colorTable has no index: " + colorIndex);
+          return;
+        }
+
+        for (var i in window.pixelColors) {
+          window.pixelColors[i] = rgb;
+        }
+
+        //if (lastScreenColorIndex != colorIndex) {
+        // lastScreenColorIndex = colorIndex;
+
+        var rgbString = "rgb(" + rgb[0] + "," + rgb[1] + "," + rgb[2] + ")";
+        canvasContext.fillStyle = rgbString;
+        canvasContext.fillRect(0, 0, canvas.width, canvas.height);
+        canvasContext.save();
       };
 
       var printedKeys = [];
       var printedPixels = [];
 
-      // can only store strings as keys, so use this to grab x & y for now ... can optimize later ... will use array to store * values instead of map
+      // TODO make this an index in an array including all pixels
       var keyForPixel = function(x, y) {
-        //if (! printedPixels[x + "x" + y]) {
-        //  console.log(["x/y", x, y]);
-        //  printedPixels[x + "x" + y] = true;
-        //}
         return x + "x" + y;
       };
-
       var pixelFromKey = function(key) {
         var keyParts = key.split("x");
         return [parseInt(keyParts[0]), parseInt(keyParts[1])];
