@@ -7,6 +7,14 @@
     <input type="file" id="cdg-file" /><br />
     <!--
     <style>
+      #cdg-canvas:-webkit-full-screen {
+        /* x, y, z */
+        -webkit-transform: scale3d(4, 2, 1);
+      }
+    </style>
+    -->
+    <!--
+    </style>
       :-webkit-full-screen {
         width: 100% !important;
       }
@@ -37,7 +45,7 @@
     <button onclick="start()">Start</button>
     <button onclick="stop()">Stop</button>
     <!-- <canvas id="cdg-canvas" width="294" height="204" style="border: 1px solid black;"></canvas> -->
-    <canvas id="cdg-canvas" width="300" height="216" style="border: 1px solid black;"></canvas>
+    <canvas id="cdg-canvas" width="300" height="216" style="outline: 1px solid black;"></canvas>
     <pre>
       [X] renderNextTile() - go through and find the next tile and puts its pixel indices in the right places
           [X] put indices into array on Normal tile
@@ -174,14 +182,23 @@
       var canvasContext = canvas.getContext("2d");
 
       var fullScreen = function() {
-        fullscreenify(canvas);
         canvas.webkitRequestFullScreen();
+
+        // fullscreenify(canvas);
+        //
+        // outline: 1px solid black; -webkit-transform: scale3d(1.5, 1.5, 1);
+        var yScale = ((window.innerHeight - 10) / canvas.height).toFixed(2);
+        var xScale = ((window.innerWidth - 10) / canvas.width).toFixed(2);
+        var scaleTransformCss = "scale3d(" + xScale + ", " + yScale + ", 1);";
+        // canvas.style.webkitTransform = scaleTransformCss;
+        // ^ not working ... ??? works when done via console
+        canvas.setAttribute("style", "-webkit-transform: " + scaleTransformCss);
       };
 
       function fullscreenify(canvas) {
         var style = canvas.getAttribute('style') || '';
 
-        // window.addEventListener('resize', function () {resize(canvas);}, false);
+        window.addEventListener('resize', function () {resize(canvas);}, false);
 
         resize(canvas);
 
@@ -201,9 +218,12 @@
           console.log("SCALE");
           console.log(scale);
 
+          // MANUALLY
+          // outline: 1px solid black; -webkit-transform: scale3d(1.5, 1.5, 1);
+
           // canvas.setAttribute('style', '-webkit-transform-origin: center top; -webkit-transform: scale3d(1.5, 1.5, 1); margin-top: -50px;');
 
-          canvas.setAttribute('style', style + ' ' + 'margin-top: -200px; -ms-transform-origin: center top; -webkit-transform-origin: center top; -moz-transform-origin: center top; -o-transform-origin: center top; transform-origin: center top; -ms-transform: scale(' + scale + '); -webkit-transform: scale3d(' + scale + ', 1); -moz-transform: scale(' + scale + '); -o-transform: scale(' + scale + '); transform: scale(' + scale + ');');
+          // canvas.setAttribute('style', style + ' ' + '-ms-transform-origin: center top; -webkit-transform-origin: center top; -moz-transform-origin: center top; -o-transform-origin: center top; transform-origin: center top; -ms-transform: scale(' + scale + '); -webkit-transform: scale3d(' + scale + ', 1); -moz-transform: scale(' + scale + '); -o-transform: scale(' + scale + '); transform: scale(' + scale + ');');
 
           // canvas.setAttribute('style', style + ' ' + '-ms-transform-origin: center top; -webkit-transform-origin: center top; -moz-transform-origin: center top; -o-transform-origin: center top; transform-origin: center top; -ms-transform: scale(' + scale + '); -webkit-transform: scale3d(' + scale + ', 1); -moz-transform: scale(' + scale + '); -o-transform: scale(' + scale + '); transform: scale(' + scale + ');');
         }
